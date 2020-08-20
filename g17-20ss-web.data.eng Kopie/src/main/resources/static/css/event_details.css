@@ -1,0 +1,51 @@
+@media only screen and (max-width: 767px) {#footer { display: none !important;}}
+@media only screen and (min-width: 768px) {#mobile_copyright { display: none !important;}}
+
+footer {
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    font-size: small;
+    font-weight: lighter;
+}
+
+#name {
+    font-weight: bolder;
+    font-size: 20px;
+}
+#rating {
+    float: right;
+}
+#button {
+    width: 80px;
+    margin: 2px;
+}
+.img{
+    width: 7%;
+    height: 7%;
+    padding-left: 20px;
+}
+h2 {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 30px;
+}
+.temp{
+    padding-left: 135px;
+    padding-top: 10px;
+}
+.information{
+    font-weight: bolder;
+}
+.informationWeather{
+    font-weight: bolder;
+}
+.err{
+    color: darkred;
+    font-weight: bolder;
+}
+#description{
+    margin-left: 20px;
+}

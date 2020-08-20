@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleafe.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Eventdetails</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <script src="js-cookie-latest/src/js.cookie.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/event_details.css">
+
+</head>
+<body>
+<nav th:replace="layouts :: navbar"></nav>
+<div class="container">
+    <h2>EventDetails</h2>
+    <div>
+        <p id="name" th:text="${event.name}">Name</p>
+    </div>
+    <div>
+        <div id="rating">
+            <div th:name="eventId" th:value="${event.eventId}">
+                <button id="button-like" th:name="eventId" th:value="${event.eventId}" class="btn btn-dark">Like
+                </button>
+                <button id="button-dislike" th:name="eventId" th:value="${event.eventId}" class="btn btn-dark">Dislike
+                </button>
+            </div>
+        </div>
+    </div>
+    <div>
+        <a class="information">Wo? </a>
+        <a th:text="${event.location}"></a>
+    </div>
+    <div>
+        <a class="information">Wann? </a>
+        <a th:text="${event.date}"></a>
+    </div>
+    <div>
+        <a class="information">Was? </a>
+        <a th:text="${event.eventType}"></a>
+    </div>
+    <p></p>
+    <div>
+        <a class="information">Beschreibung:</a>
+        <p id="description" th:text="${event.description}"></p>
+    </div>
+    <p></p>
+    <div>
+        <a class="information">Interesse: </a>
+        <a th:text="${event.interest}"></a>
+    </div>
+    <div>
+        <a class="information">Desinteresse: </a>
+        <a th:text="${event.disinterest}"></a>
+    </div>
+
+    <div>
+        <a class="informationWeather"></a>
+        <img class="img">
+        <p class="temp"></p>
+        <p class="err"></p>
+    </div>
+
+</div>
+<footer id="footer" th:replace="layouts :: footer"></footer>
+<script th:inline="javascript">
+    //hole daten aus dem modell
+    /*<![CDATA[*/
+    var query = [[${event.location}]];
+    /*]]>*/
+    /*<![CDATA[*/
+    var date = [[${event.date}]];
+    /*]]>*/
+    /*<![CDATA[*/
+    var eventId = [[${event.eventId}]];
+    /*]]>*/
+    var isLiked;
+    var isDisliked;
+    var isCookie = false;
+
+
+    function setCookie(){
+        Cookies.remove("EventCookie" + eventId);
+        var jsonString = JSON.stringify({
+            eventId,
+            isLiked,
+            isDisliked
+        });
+        isCookie = true;
+        Cookies.set("EventCookie"+ eventId, jsonString);
+    }
+
+    function getCookie() {
+        var cookieVal = Cookies.get("EventCookie" + eventId);
+        if(!cookieVal) {
+            return null;
+        }
+        return JSON.parse(cookieVal);
+    }
+
+
+    $("#button-like").click(function() {
+        isDisliked = false
+        isLiked = true
+        setCookie();
+        disableButton();
+
+        // POST to /ratingLike with the assigned eventId
+        $.post("/ratingLike", { eventId: $(this).attr("value") });
+        // Reload page to show (dis)interest
+        location.reload();
+    });
+    $("#button-dislike").click(function (){
+        isLiked = false
+        isDisliked = true
+        setCookie();
+        disableButton();
+
+        // POST to /ratingDislike with the assigned eventId
+        $.post("/ratingDislike", { eventId: $(this).attr("value") });
+        // Reload page to show (dis)interest
+        location.reload();
+    });
+
+    $(document).ready(() => {
+        var cookieVal = getCookie();
+        if(cookieVal) {
+            isLiked = cookieVal.isLiked;
+            isDisliked = cookieVal.isDisliked;
+        }
+
+        disableButton()
+    })
+
+    function disableButton() {
+        if (isLiked){
+            $("#button-like").prop('disabled', true);
+            $("#button-dislike").prop('disabled', false);
+        }else if (isDisliked){
+            $("#button-like").prop('disabled', false);
+            $("#button-dislike").prop('disabled', true);
+        }
+    }
+
+    //aktuelles datum wird abgefragt; datum in 7 tagen wird gespeichert und eventdatum in js objekt gespeichert
+    var currentDate = new Date();
+    inAWeek = new Date(Number(currentDate) + 7*(24 * 3600 * 1000));
+    var eventDate= new Date(date);
+
+    //prüfe ob event <= 7 tage entfernt ist und nicht in der Vergangenheit liegt
+    if((eventDate <= (inAWeek)) && (eventDate >= currentDate)){
+        weather();
+    }if (eventDate < currentDate){
+        $('.err').append("Das Event liegt in der Vergangenheit");
+    }if (eventDate > inAWeek){
+        $('.err').append("Eine Woche vor dem Eventtag ist hier ein Wetterbericht zu finden");
+    }
+
+    //wird aufgerufen wenn das event nur noch eine Woche entfernt ist
+    function weather() {
+        //verändert datum gemäß api konvention YYYY/MM/DD
+        date = date.split("-");
+        var formatedDate = date[0] + '/' + date[1] + '/' + date[2];
+        //geonames api sucht location und speichert englische bezeichnung ab
+        var adjustedQuery = "";
+        var woeid = "";
+        $.getJSON("http://api.geonames.org/searchJSON?q=" + query + "&maxRows=10&username=matthias", function a(findName) {
+            if (typeof findName.geonames[0] === 'undefined') {
+                //falls kein Ort ermittelt werden kann
+                $('.err').append("Für den Veranstaltungsort kann das Wetter nicht vorausgesagt werden");
+            }
+            adjustedQuery = findName.geonames[0].name;
+
+            //nimmt obige bezeichnung und speichert woeid ab
+            $.getJSON("https://www.metaweather.com/api/location/search/?query=" + adjustedQuery, function b(locationData) {
+                if (typeof locationData[0] === 'undefined') {
+                    //falls kein Ort ermittelt werden kann
+                    $('.err').append("Für den Veranstaltungsort kann das Wetter nicht vorausgesagt werden");
+                }
+                var woeid = locationData[0].woeid;
+
+                //nimmt die woeid und gibt wetter des jeweiligen ortes auf der html seite aus
+                $.getJSON("https://www.metaweather.com/api/location/" + woeid + "/", function c(data) {
+                    var icon = "https://www.metaweather.com/static/img/weather/" + data.consolidated_weather[0].weather_state_abbr + ".svg";
+                    var temp = Math.floor(data.consolidated_weather[0].the_temp);
+                    $.getJSON("https://www.metaweather.com/api/location/" + woeid + "/" + formatedDate + "/", function c(weatherData) {
+                        var icon = "https://www.metaweather.com/static/img/weather/" + weatherData[0].weather_state_abbr + ".svg";
+                        var temp = Math.floor(weatherData[0].the_temp);
+                        $('.informationWeather').append("Wetterbericht:");
+                        $('.img').attr('src', icon);
+                        $('.temp').append("Temperatur: " + temp + "°C");
+                    })
+                });
+            })
+        })
+    }
+
+</script>
+</body>
+</html>

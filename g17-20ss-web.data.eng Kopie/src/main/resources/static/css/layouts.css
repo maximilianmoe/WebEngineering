@@ -1,0 +1,33 @@
+@media only screen and (max-width: 767px) {#footer { display: none !important;}}
+@media only screen and (min-width: 768px) {#mobile_copyright { display: none !important;}}
+
+footer {
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    font-size: small;
+    font-weight: lighter;
+    background-color: #D3D3D3;
+}
+
+#copyright {
+    font-size: small;
+    font-weight: lighter;
+}
+#mobile_copyright{
+    font-size: x-small;
+    font-weight: lighter;
+    color: white;
+}
+
+
+#input1 {
+    width: 240px;
+}
+nav {
+    border-bottom-style: solid;
+    border-color: black;
+    border-width: thin;
+}

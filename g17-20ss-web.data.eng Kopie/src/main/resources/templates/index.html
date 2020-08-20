@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleafe.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Startseite</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="/css/index.css">
+</head>
+<body>
+<nav th:replace="layouts :: navbar"></nav>
+<h2>Eventübersicht</h2>
+<div class="row">
+    <!-- sidebar links-->
+    <div class="sidebar_left">
+        <p class="heading">Events mit dem größten Interesse</p>
+        <div class="sidenav">
+            <div th:if="${error == true}">
+                <p id="warningSidenav">Es sind nicht genügend Events vorhanden</p>
+            </div>
+            <div th:unless="${error == true}" th:each="eventAllTime : ${eventsAllTime}">
+                <a th:if="${eventAllTime.eventId == firstAllTime.eventId}" th:text="${eventAllTime.name}" class="place1" >Event 1</a>
+                <a th:if="${eventAllTime.eventId == secondAllTime.eventId}" th:text="${eventAllTime.name}" class="place2" >Event 2</a>
+                <a th:if="${eventAllTime.eventId == thirdAllTime.eventId}" th:text="${eventAllTime.name}" class="place3" >Event 3</a>
+            </div>
+        </div>
+    </div>
+    <!-- main-->
+    <div class="main">
+        <div th:unless="${searched == true}">
+        <section th:unless="${events == 0}">
+            <div th:each="event : ${events}">
+                <div>
+                    <div>
+                        <div th:unless="${placeError == true}">
+                            <div th:if="${firstPlace.eventId == event.eventId}" class="place1" th:text="${event.name}"> Name</div>
+                            <div th:if="${secondPlace.eventId == event.eventId}" class="place2" th:text="${event.name}">Name</div>
+                            <div th:if="${thirdPlace.eventId == event.eventId}" class="place3" th:text="${event.name}">Name</div>
+                            <div th:unless="${firstPlace.eventId == event.eventId or secondPlace.eventId == event.eventId or thirdPlace.eventId == event.eventId}"
+                                 class="name" th:text="${event.name}">Name</div>
+                        </div>
+                        <div th:if="${placeError == true}">
+                            <div class="name" th:text="${event.name}">Name</div>
+                        </div>
+                        <span class="buttons">
+                            <form th:action="@{/event_details}" method="get">
+                                <button th:name="eventId" th:value="${event.eventId}" type="submit" class="btn btn-dark">Zum Event</button>
+                            </form>
+                        </span>
+                    </div>
+                </div>
+                <div th:text="${event.date}">Date</div>
+                <div th:text="${event.location}">Location</div>
+                <div th:text="${event.description}" class="description">Description</div>
+                <hr id="line">
+                <div th:if="${placeError == true}">
+                    <p id="placeWarning">Es wurde zu wenige Events gefunden, um eine Rangliste zu bilden</p>
+                </div>
+            </div>
+        </section>
+        </div>
+        <div th:if="${searched == true}">
+            <div th:each="eventSearch : ${eventsSearch}">
+                <a class="name" th:text="${eventSearch.name}">Name</a>
+                <span class="buttons">
+                    <form th:action="@{/event_details}" method="get">
+                        <button th:name="eventId" th:value="${eventSearch.eventId}" type="submit" class="btn btn-dark">Zum Event</button>
+                    </form>
+                </span>
+                <div th:text="${eventSearch.date}">Date</div>
+                <div th:text="${eventSearch.location}">Location</div>
+                <div th:text="${eventSearch.description}" class="description">Description</div>
+                <hr id="line">
+            </div>
+        </div>
+        <section th:if="${events == 0}">
+            <p id="warning">Eine Veranstaltung mit diesem Namen bzw. Ort existiert leider nicht!</p>
+        </section>
+        <section th:if="${noEvents == 0}">
+            <p id="noEvents">Es stehen keine Veranstaltungen dieses Eventtyps bevor</p>
+        </section>
+    </div>
+    <!--sidebar right -->
+    <div class="sidebar_right">
+        <form th:action="@{/index}" method="get">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" type="button" id="dropdownMenuButton">
+                    Nach Eventtyp filtern</button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <button type="submit" class="dropdown-item" th:name="filter" id="item0" th:value="0">Alle</button>
+                    <button type="submit" class="dropdown-item" th:name="filter" id="item1" th:value="1">Ausstellung</button>
+                    <button type="submit" class="dropdown-item" th:name="filter" id="item2" th:value="2">Festival</button>
+                    <button type="submit" class="dropdown-item" th:name="filter" id="item3" th:value="3">Konzert</button>
+                    <button type="submit" class="dropdown-item" th:name="filter" id="item4" th:value="4">Show</button>
+                </div>
+            </div>
+        </form>
+        <span>
+                <form th:action="@{/index_all}" method="get">
+                    <button id="btn-all-ev" type="submit" class="btn btn-dark">Alle Events</button>
+                </form>
+            </span>
+    </div>
+</div>
+    <footer id="footer" th:replace="layouts :: footer"></footer>
+<script th:inline="javascript">
+    $(document).ready(() => {
+
+        // limit description-length to 20 characters + "..."
+        $(function(){
+            $("div.description").each(function(i){
+                length = $(this).text().length
+                if (length > 20) {
+                    $(this).text($(this).text().substr(0, 20) + '…')
+                }
+            })
+        })
+    })
+    function filter() {
+    }
+
+</script>
+</body>
+</html>

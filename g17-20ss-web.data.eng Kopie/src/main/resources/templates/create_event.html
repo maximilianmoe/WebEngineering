@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleafe.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Event hinzufügen</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/create_event.css">
+    <style>
+        #existing {
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+<nav th:replace="layouts:: navbar"></nav>
+<h2 id="heading">Event hinzufügen</h2>
+
+<div>
+<form  class="input" th:action="@{/create_event}" method="post" name="formtag">
+<div class="grid-container">
+            <div class="grid-item">
+                <a data-tooltip title="Geben Sie hier den Eventnamen ein">
+                    <input required onblur="validateText(this)" type="text" id="name" name="name" th:value="*{event.name}" th:name="name" class="form-control" placeholder="Name">
+                </a>
+            </div>
+            <div class="grid-item">
+                <a data-tooltip title="Geben sie hier den Namen des Eventorts an">
+                    <input required onkeydown="return alphaOnly(event);" onblur="validateText(this)" type="text" id="location" name="location" th:value="*{event.location}" th:name="location" class="form-control" placeholder="Ort">
+                </a>
+            </div>
+            <div class="grid-item">
+                <a data-tooltip title="Geben Sie hier das Eventdatum ein"></a>
+                <input required onblur="validateDate()" type="date" id="date" th:value="*{event.date}" th:name="date" class="form-control" placeholder="Datum">
+            </div>
+
+
+        <div class="grid-item">
+            <select required onchange="typeChange()" class="form-control" name="veranstaltungstyp" th:name="eventType" id="veranstaltungstyp">
+               <option selected disabled>Veranstaltungstyp wählen</option>
+               <option th:value="1">Ausstellung</option>
+               <option th:value="2">Festival</option>
+               <option th:value="3">Konzert</option>
+               <option th:value="4">Show</option>
+            </select>
+        </div>
+
+    <div class="grid-item-big">
+        <a data-tooltip title="Geben Sie hier die Beschreibung ein"></a>
+        <input required onblur="validateText(this)" type="text" name="description" id="description" th:value="*{event.description}" th:name="description" class="form-control" maxlength="350" placeholder="Beschreibung (max. 350 Zeichen)"><br><br>
+    </div>
+
+</div>
+<div class="button">
+    <button disabled onsubmit="validateAll()" type="submit" class="btn btn-outline-secondary btn-lg" id="submit" name="submit">Event erstellen</button>
+</div>
+    <div class="error" th:if="${existing} == true" id="existing">Ein Event mit diesem Namen existiert bereits!</div>
+    <p id="missing"></p>
+</form>
+</div>
+<footer id="footer" th:replace="layouts :: footer"></footer>
+</body>
+<script type="text/javascript">
+    let error = false;
+
+        function validateDate() {
+            var date = document.getElementById('date').value;
+            var today = new Date();
+            var dateNow = today.getFullYear()+'-0'+(today.getMonth()+1)+'-'+today.getDate();
+
+            if (date < dateNow) {
+                alert('Das Datum kann nicht ausgewählt werden, da es in der Vergangenheit liegt');
+                $('#submit').prop('disabled', true);
+            } else {
+                $('#submit').prop('disabled', false);
+            }
+        }
+        function validateText(id) {
+            var textId = "'"+id.id+"'";
+            if (textId === "'description'") {
+                var elm = document.getElementById('description').value;
+            } else if (textId === "'name'") {
+                var elm = document.getElementById('name').value;
+            } else if (textId === "'location'") {
+                var elm = document.getElementById('location').value;
+            }
+
+            if (elm === "") {
+                alert("Füllen sie dieses Feld bitte aus!");
+                error = true;
+                $('#submit').prop('disabled', true);
+            } else {
+                $('#submit').prop('disabled', false);
+            }
+        }
+        function validateAll() {
+            if (error) {
+                alert("Bitte Füllen sie alle Felder aus!")
+            }
+        }
+        function typeChange() {
+            $('#submit').prop('disabled', false);
+        }
+
+        // only allow letters, '.', '-', backspace, space
+        function alphaOnly(event) {
+            var key = event.keyCode;
+            return ((key >= 65 && key <= 90) || key == 8 || key == 186 || key == 222 || key == 192 || key == 190 || key == 189 || key == 32);
+        };
+
+</script>
+</html>
